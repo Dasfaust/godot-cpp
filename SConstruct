@@ -16,7 +16,7 @@ if sys.platform.startswith('linux'):
     host_platform = 'linux'
 elif sys.platform == 'darwin':
     host_platform = 'osx'
-elif sys.platform == 'win32':
+elif sys.platform == 'win32' or sys.platform == 'msys':
     host_platform = 'windows'
 else:
     raise ValueError(
@@ -151,15 +151,21 @@ elif env['platform'] == 'windows':
         elif env['target'] == 'release':
             env.Append(CCFLAGS=['/O2', '/EHsc', '/DNDEBUG', '/MD'])
 
-    elif host_platform == 'linux':
+    elif host_platform == 'linux' or host_platform == 'osx':
         # Cross-compilation using MinGW
         if env['bits'] == '64':
             env['CXX'] = 'x86_64-w64-mingw32-g++'
+            env['AR'] = "x86_64-w64-mingw32-ar"
+            env['RANLIB'] = "x86_64-w64-mingw32-ranlib"
+            env['LINK'] = "x86_64-w64-mingw32-g++"
         elif env['bits'] == '32':
             env['CXX'] = 'i686-w64-mingw32-g++'
+            env['AR'] = "i686-w64-mingw32-ar"
+            env['RANLIB'] = "i686-w64-mingw32-ranlib"
+            env['LINK'] = "i686-w64-mingw32-g++"
 
     # Native or cross-compilation using MinGW
-    if host_platform == 'linux' or env['use_mingw']:
+    if host_platform == 'linux' or host_platform == 'osx' or env['use_mingw']:
         env.Append(CCFLAGS=['-g', '-O3', '-std=c++14', '-Wwrite-strings'])
         env.Append(LINKFLAGS=[
             '--static',
